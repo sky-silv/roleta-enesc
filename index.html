@@ -3,51 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roleta ENESC</title>
+  <title>Roleta ENESC-GO JOVEM</title>
   <!-- Simple-Keyboard CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    
+    body { 
+      background: linear-gradient(135deg, #1b429b 0%, #0b2265 100%); 
+      color: #ffffff; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+      overflow: hidden; 
+    }
+    
     .page { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: absolute; top: 0; left: 0; }
     .active { display: flex; }
     
-    /* Inicio */
-    .logo { max-width: 300px; margin-bottom: 40px; }
-    .btn { background: #2563eb; color: #fff; border: none; padding: 20px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(37,99,235,0.4); }
-    .btn:hover { background: #1d4ed8; transform: scale(1.05); }
+    /* Início */
+    .logo { max-width: 320px; width: 80%; height: auto; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+    
+    .btn { 
+      background: linear-gradient(180deg, #f8d000 0%, #e0ab00 100%); 
+      color: #0b2265; 
+      border: 3px solid #ffffff; 
+      padding: 18px 50px; 
+      font-size: 1.8rem; 
+      font-weight: 800; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn:hover { 
+      transform: scale(1.05); 
+      background: linear-gradient(180deg, #ffe033 0%, #f8d000 100%);
+      box-shadow: 0 12px 25px rgba(248, 208, 0, 0.4);
+    }
 
-    /* Formulario */
-    .form-container { background: #1e293b; padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 1.1rem; }
-    .form-group input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #334155; background: #0f172a; color: #fff; font-size: 1.2rem; }
-    .form-group input:focus { border-color: #2563eb; outline: none; }
-    .error-msg { color: #ef4444; margin-top: 10px; text-align: center; font-weight: bold; }
+    /* Formulário */
+    .form-container { 
+      background: rgba(11, 34, 101, 0.85); 
+      backdrop-filter: blur(10px);
+      padding: 30px; 
+      border-radius: 20px; 
+      width: 100%; 
+      max-width: 600px; 
+      border: 2px solid rgba(248, 208, 0, 0.4);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+    }
+    
+    .form-container h2 {
+      color: #f8d000;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; margin-bottom: 4px; font-size: 1.05rem; font-weight: 600; color: #e2e8f0; }
+    .form-group input { 
+      width: 100%; 
+      padding: 14px; 
+      border-radius: 10px; 
+      border: 2px solid #1e50bc; 
+      background: #0d1b40; 
+      color: #ffffff; 
+      font-size: 1.2rem; 
+    }
+    
+    .form-group input:focus { 
+      border-color: #f8d000; 
+      outline: none; 
+      box-shadow: 0 0 10px rgba(248, 208, 0, 0.5);
+    }
+    
+    .error-msg { color: #ff4d4d; margin-top: 10px; text-align: center; font-weight: bold; font-size: 1.1rem; }
 
     /* Teclado Virtual */
-    .simple-keyboard { color: #000; margin-top: 15px; max-width: 600px; border-radius: 10px; }
+    .simple-keyboard { 
+      color: #000; 
+      margin-top: 15px; 
+      max-width: 600px; 
+      border-radius: 12px; 
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 8px;
+    }
+    .hg-button {
+      height: 45px !important;
+      font-size: 1.2rem !important;
+      font-weight: bold !important;
+    }
 
     /* Roleta */
-    .wheel-container { position: relative; width: 350px; height: 350px; margin-bottom: 30px; }
-    canvas { border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
-    .arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ef4444; z-index: 10; }
-    .result-msg { font-size: 2rem; font-weight: bold; text-align: center; min-height: 60px; color: #38bdf8; }
+    .wheel-container { position: relative; width: 360px; height: 360px; margin-bottom: 25px; }
+    canvas { border-radius: 50%; border: 6px solid #f8d000; box-shadow: 0 0 30px rgba(0,0,0,0.6); }
+    
+    .arrow { 
+      position: absolute; 
+      top: -18px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 0; 
+      height: 0; 
+      border-left: 18px solid transparent; 
+      border-right: 18px solid transparent; 
+      border-top: 32px solid #009933; 
+      filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5));
+      z-index: 10; 
+    }
+    
+    .result-msg { 
+      font-size: 2.2rem; 
+      font-weight: 800; 
+      text-align: center; 
+      min-height: 60px; 
+      color: #f8d000; 
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
 
   <!-- TELA 1: INÍCIO -->
   <div id="page-home" class="page active">
-    <!-- Substitua logo-enesc.png pela sua imagem no GitHub -->
-    <img src="logo-enesc.png" alt="Logo ENESC" class="logo" onerror="this.src='https://via.placeholder.com/300x120?text=LOGO+ENESC'">
+    <img src="logo-enesc.jpeg" alt="Logo ENESC-GO JOVEM" class="logo" onerror="this.src='https://via.placeholder.com/320x320/0b2265/f8d000?text=ENESC-GO+JOVEM'">
     <button class="btn" onclick="goToForm()">INICIAR</button>
   </div>
 
   <!-- TELA 2: FORMULÁRIO -->
   <div id="page-form" class="page">
     <div class="form-container">
-      <h2 style="text-align: center; margin-bottom: 20px;">Informe seus dados</h2>
+      <h2 style="text-align: center; margin-bottom: 15px;">Informe seus dados</h2>
       <div class="form-group">
         <label>Nome Completo</label>
         <input type="text" id="input-nome" class="input" placeholder="Digite seu nome">
@@ -65,9 +156,8 @@
         <input type="tel" id="input-phone" class="input" placeholder="(00) 00000-0000">
       </div>
       <div id="error" class="error-msg"></div>
-      <button class="btn" style="width: 100%; margin-top: 15px;" onclick="validateAndStart()">GIRAR ROLETA</button>
+      <button class="btn" style="width: 100%; margin-top: 15px; font-size: 1.5rem;" onclick="validateAndStart()">GIRAR ROLETA</button>
     </div>
-    <!-- Teclado Touch incorporado -->
     <div class="simple-keyboard"></div>
   </div>
 
@@ -75,7 +165,7 @@
   <div id="page-wheel" class="page">
     <div class="wheel-container">
       <div class="arrow"></div>
-      <canvas id="wheel" width="350" height="350"></canvas>
+      <canvas id="wheel" width="360" height="360"></canvas>
     </div>
     <button id="spin-btn" class="btn" onclick="spinWheel()">GIRAR!</button>
     <div id="result" class="result-msg"></div>
@@ -99,7 +189,7 @@
         ]
       },
       display: {
-        "{bksp}": "⌫",
+        "{bksp}": "⌫ Apagar",
         "{space}": "Espaço"
       }
     });
@@ -125,7 +215,6 @@
 
     function onKeyPressKeyboard(button) {}
 
-    // Navegação entre páginas
     function showPage(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -138,7 +227,6 @@
       showPage('page-form');
     }
 
-    // Validação de CPF
     function isValidCPF(cpf) {
       cpf = cpf.replace(/[^\d]+/g, '');
       if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
@@ -171,24 +259,25 @@
         return;
       }
 
-      // Checa duplicidade por CPF
       const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
       if (playedCPFs.includes(cpf)) {
         err.innerText = 'Este CPF já realizou uma tentativa!';
         return;
       }
 
-      // Salva dados temporários
       window.currentUser = { nome, cpf, email, phone };
       showPage('page-wheel');
       drawWheel();
     }
 
-    // Roleta Config
+    // Cores alinhadas à marca ENESC-GO:
+    // Agenda (Raro - 5%): Amarelo Ouro (#f8d000)
+    // Chaveiro (45%): Verde CREA (#009933)
+    // Caneta (50%): Azul Marinho (#0b2265)
     const items = [
-      { label: "Agenda", color: "#f59e0b", weight: 5 },   // Raro (5%)
-      { label: "Chaveiro", color: "#10b981", weight: 45 }, // 45%
-      { label: "Caneta", color: "#6366f1", weight: 50 }   // 50%
+      { label: "Agenda", color: "#f8d000", textColor: "#0b2265", weight: 5 },   
+      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 45 }, 
+      { label: "Caneta", color: "#0b2265", textColor: "#ffffff", weight: 50 }    
     ];
 
     const canvas = document.getElementById('wheel');
@@ -197,23 +286,23 @@
     function drawWheel() {
       const numSlices = items.length;
       const sliceAngle = (2 * Math.PI) / numSlices;
-      ctx.clearRect(0, 0, 350, 350);
+      ctx.clearRect(0, 0, 360, 360);
 
       items.forEach((item, i) => {
         const angle = i * sliceAngle;
         ctx.beginPath();
         ctx.fillStyle = item.color;
-        ctx.moveTo(175, 175);
-        ctx.arc(175, 175, 175, angle, angle + sliceAngle);
-        ctx.lineTo(175, 175);
+        ctx.moveTo(180, 180);
+        ctx.arc(180, 180, 180, angle, angle + sliceAngle);
+        ctx.lineTo(180, 180);
         ctx.fill();
 
         ctx.save();
-        ctx.translate(175, 175);
+        ctx.translate(180, 180);
         ctx.rotate(angle + sliceAngle / 2);
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 18px Arial";
-        ctx.fillText(item.label, 60, 5);
+        ctx.fillStyle = item.textColor;
+        ctx.font = "bold 20px Arial";
+        ctx.fillText(item.label, 65, 7);
         ctx.restore();
       });
     }
@@ -238,14 +327,13 @@
       const itemIndex = items.findIndex(i => i.label === selectedItem.label);
       const sliceAngle = 360 / items.length;
 
-      // Cálculo de rotação para cair no item sorteado
       const targetDegrees = 360 - (itemIndex * sliceAngle + sliceAngle / 2);
-      const totalSpin = 360 * 5 + targetDegrees; // 5 voltas completas
+      const totalSpin = 360 * 5 + targetDegrees;
 
       let start = null;
       function animate(timestamp) {
         if (!start) start = timestamp;
-        const progress = (timestamp - start) / 4000; // 4 segundos rodando
+        const progress = (timestamp - start) / 4000;
         if (progress < 1) {
           const easeOut = 1 - Math.pow(1 - progress, 3);
           canvas.style.transform = `rotate(${easeOut * totalSpin}deg)`;
@@ -254,12 +342,10 @@
           canvas.style.transform = `rotate(${totalSpin}deg)`;
           document.getElementById('result').innerText = `Parabéns! Você ganhou: ${selectedItem.label}`;
           
-          // Registrar CPF como já utilizado
           const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
           playedCPFs.push(window.currentUser.cpf);
           localStorage.setItem('played_cpfs', JSON.stringify(playedCPFs));
 
-          // Retorna à página inicial após 15 segundos
           setTimeout(() => {
             canvas.style.transform = 'rotate(0deg)';
             document.getElementById('spin-btn').style.display = 'inline-block';
