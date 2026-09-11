@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roleta ENESC</title>
+  <!-- Simple-Keyboard CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+    .page { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: absolute; top: 0; left: 0; }
+    .active { display: flex; }
+    
+    /* Inicio */
+    .logo { max-width: 300px; margin-bottom: 40px; }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 20px 50px; font-size: 1.8rem; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(37,99,235,0.4); }
+    .btn:hover { background: #1d4ed8; transform: scale(1.05); }
+
+    /* Formulario */
+    .form-container { background: #1e293b; padding: 30px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 1.1rem; }
+    .form-group input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #334155; background: #0f172a; color: #fff; font-size: 1.2rem; }
+    .form-group input:focus { border-color: #2563eb; outline: none; }
+    .error-msg { color: #ef4444; margin-top: 10px; text-align: center; font-weight: bold; }
+
+    /* Teclado Virtual */
+    .simple-keyboard { color: #000; margin-top: 15px; max-width: 600px; border-radius: 10px; }
+
+    /* Roleta */
+    .wheel-container { position: relative; width: 350px; height: 350px; margin-bottom: 30px; }
+    canvas { border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+    .arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ef4444; z-index: 10; }
+    .result-msg { font-size: 2rem; font-weight: bold; text-align: center; min-height: 60px; color: #38bdf8; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA 1: INÍCIO -->
+  <div id="page-home" class="page active">
+    <!-- Substitua logo-enesc.png pela sua imagem no GitHub -->
+    <img src="logo-enesc.png" alt="Logo ENESC" class="logo" onerror="this.src='https://via.placeholder.com/300x120?text=LOGO+ENESC'">
+    <button class="btn" onclick="goToForm()">INICIAR</button>
+  </div>
+
+  <!-- TELA 2: FORMULÁRIO -->
+  <div id="page-form" class="page">
+    <div class="form-container">
+      <h2 style="text-align: center; margin-bottom: 20px;">Informe seus dados</h2>
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="input-nome" class="input" placeholder="Digite seu nome">
+      </div>
+      <div class="form-group">
+        <label>CPF</label>
+        <input type="text" id="input-cpf" class="input" placeholder="000.000.000-00">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="input-email" class="input" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Número de Telefone</label>
+        <input type="tel" id="input-phone" class="input" placeholder="(00) 00000-0000">
+      </div>
+      <div id="error" class="error-msg"></div>
+      <button class="btn" style="width: 100%; margin-top: 15px;" onclick="validateAndStart()">GIRAR ROLETA</button>
+    </div>
+    <!-- Teclado Touch incorporado -->
+    <div class="simple-keyboard"></div>
+  </div>
+
+  <!-- TELA 3: ROLETA -->
+  <div id="page-wheel" class="page">
+    <div class="wheel-container">
+      <div class="arrow"></div>
+      <canvas id="wheel" width="350" height="350"></canvas>
+    </div>
+    <button id="spin-btn" class="btn" onclick="spinWheel()">GIRAR!</button>
+    <div id="result" class="result-msg"></div>
+  </div>
+
+  <!-- Simple-Keyboard JS -->
+  <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
+  <script>
+    let activeInput = null;
+    const Keyboard = window.SimpleKeyboard.default;
+    const keyboard = new Keyboard({
+      onChange: input => onChangeKeyboard(input),
+      onKeyPress: button => onKeyPressKeyboard(button),
+      layout: {
+        default: [
+          "1 2 3 4 5 6 7 8 9 0 {bksp}",
+          "q w e r t y u i o p",
+          "a s d f g h j k l",
+          "z x c v b n m . @",
+          "{space}"
+        ]
+      },
+      display: {
+        "{bksp}": "⌫",
+        "{space}": "Espaço"
+      }
+    });
+
+    document.querySelectorAll(".input").forEach(input => {
+      input.addEventListener("focus", onInputFocus);
+      input.addEventListener("keyup", onInputKeyUp);
+    });
+
+    function onInputFocus(event) {
+      activeInput = event.target;
+      keyboard.setOptions({ inputName: event.target.id });
+      keyboard.setInput(event.target.value);
+    }
+
+    function onInputKeyUp(event) {
+      keyboard.setInput(event.target.value);
+    }
+
+    function onChangeKeyboard(input) {
+      if (activeInput) activeInput.value = input;
+    }
+
+    function onKeyPressKeyboard(button) {}
+
+    // Navegação entre páginas
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function goToForm() {
+      document.getElementById('error').innerText = '';
+      document.querySelectorAll('.input').forEach(i => i.value = '');
+      keyboard.clearInput();
+      showPage('page-form');
+    }
+
+    // Validação de CPF
+    function isValidCPF(cpf) {
+      cpf = cpf.replace(/[^\d]+/g, '');
+      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+      let rev = 0;
+      for (let i = 0; i < 9; i++) rev += parseInt(cpf.charAt(i)) * (10 - i);
+      rev = 11 - (rev % 11);
+      if (rev === 10 || rev === 11) rev = 0;
+      if (rev !== parseInt(cpf.charAt(9))) return false;
+      rev = 0;
+      for (let i = 0; i < 10; i++) rev += parseInt(cpf.charAt(i)) * (11 - i);
+      rev = 11 - (rev % 11);
+      if (rev === 10 || rev === 11) rev = 0;
+      return rev === parseInt(cpf.charAt(10));
+    }
+
+    function validateAndStart() {
+      const nome = document.getElementById('input-nome').value.trim();
+      const cpf = document.getElementById('input-cpf').value.trim().replace(/[^\d]/g, '');
+      const email = document.getElementById('input-email').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+      const err = document.getElementById('error');
+
+      if (!nome || !cpf || !email || !phone) {
+        err.innerText = 'Por favor, preencha todos os campos.';
+        return;
+      }
+
+      if (!isValidCPF(cpf)) {
+        err.innerText = 'CPF inválido. Verifique os números.';
+        return;
+      }
+
+      // Checa duplicidade por CPF
+      const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
+      if (playedCPFs.includes(cpf)) {
+        err.innerText = 'Este CPF já realizou uma tentativa!';
+        return;
+      }
+
+      // Salva dados temporários
+      window.currentUser = { nome, cpf, email, phone };
+      showPage('page-wheel');
+      drawWheel();
+    }
+
+    // Roleta Config
+    const items = [
+      { label: "Agenda", color: "#f59e0b", weight: 5 },   // Raro (5%)
+      { label: "Chaveiro", color: "#10b981", weight: 45 }, // 45%
+      { label: "Caneta", color: "#6366f1", weight: 50 }   // 50%
+    ];
+
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+
+    function drawWheel() {
+      const numSlices = items.length;
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      ctx.clearRect(0, 0, 350, 350);
+
+      items.forEach((item, i) => {
+        const angle = i * sliceAngle;
+        ctx.beginPath();
+        ctx.fillStyle = item.color;
+        ctx.moveTo(175, 175);
+        ctx.arc(175, 175, 175, angle, angle + sliceAngle);
+        ctx.lineTo(175, 175);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(175, 175);
+        ctx.rotate(angle + sliceAngle / 2);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText(item.label, 60, 5);
+        ctx.restore();
+      });
+    }
+
+    function getWeightedItem() {
+      const rand = Math.random() * 100;
+      let sum = 0;
+      for (let item of items) {
+        sum += item.weight;
+        if (rand <= sum) return item;
+      }
+      return items[2];
+    }
+
+    let isSpinning = false;
+    function spinWheel() {
+      if (isSpinning) return;
+      isSpinning = true;
+      document.getElementById('spin-btn').style.display = 'none';
+
+      const selectedItem = getWeightedItem();
+      const itemIndex = items.findIndex(i => i.label === selectedItem.label);
+      const sliceAngle = 360 / items.length;
+
+      // Cálculo de rotação para cair no item sorteado
+      const targetDegrees = 360 - (itemIndex * sliceAngle + sliceAngle / 2);
+      const totalSpin = 360 * 5 + targetDegrees; // 5 voltas completas
+
+      let start = null;
+      function animate(timestamp) {
+        if (!start) start = timestamp;
+        const progress = (timestamp - start) / 4000; // 4 segundos rodando
+        if (progress < 1) {
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          canvas.style.transform = `rotate(${easeOut * totalSpin}deg)`;
+          requestAnimationFrame(animate);
+        } else {
+          canvas.style.transform = `rotate(${totalSpin}deg)`;
+          document.getElementById('result').innerText = `Parabéns! Você ganhou: ${selectedItem.label}`;
+          
+          // Registrar CPF como já utilizado
+          const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
+          playedCPFs.push(window.currentUser.cpf);
+          localStorage.setItem('played_cpfs', JSON.stringify(playedCPFs));
+
+          // Retorna à página inicial após 15 segundos
+          setTimeout(() => {
+            canvas.style.transform = 'rotate(0deg)';
+            document.getElementById('spin-btn').style.display = 'inline-block';
+            document.getElementById('result').innerText = '';
+            isSpinning = false;
+            showPage('page-home');
+          }, 15000);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+  </script>
+</body>
+</html>
