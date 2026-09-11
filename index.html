@@ -1,193 +1,364 @@
-<script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
-<script>
-  const SCRIPT_URL = "AKfycby20Y0vvxAA_iz5Ddw7vCXea6piV8Pap_YkHUd19pFxiYxrgkDsJMWnJ9oF1RECqhCL1Q"; // Mantenha sua URL aqui!
-
-  let activeInput = null;
-  const Keyboard = window.SimpleKeyboard.default;
-  const keyboard = new Keyboard({
-    onChange: input => onChangeKeyboard(input),
-    onKeyPress: button => onKeyPressKeyboard(button),
-    layout: {
-      default: [
-        "1 2 3 4 5 6 7 8 9 0 {bksp}",
-        "q w e r t y u i o p",
-        "a s d f g h j k l",
-        "z x c v b n m . @",
-        "{space}"
-      ]
-    },
-    display: {
-      "{bksp}": "⌫ Apagar",
-      "{space}": "Espaço"
-    }
-  });
-
-  document.querySelectorAll(".input").forEach(input => {
-    input.addEventListener("focus", onInputFocus);
-    input.addEventListener("keyup", onInputKeyUp);
-  });
-
-  function onInputFocus(event) {
-    activeInput = event.target;
-    keyboard.setOptions({ inputName: event.target.id });
-    keyboard.setInput(event.target.value);
-  }
-
-  function onInputKeyUp(event) {
-    keyboard.setInput(event.target.value);
-  }
-
-  function onChangeKeyboard(input) {
-    if (activeInput) activeInput.value = input;
-  }
-
-  function onKeyPressKeyboard(button) {}
-
-  function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  function goToForm() {
-    document.getElementById('error').innerText = '';
-    document.querySelectorAll('.input').forEach(i => i.value = '');
-    keyboard.clearInput();
-    showPage('page-form');
-  }
-
-  function isValidCPF(cpf) {
-    cpf = cpf.replace(/[^\d]+/g, '');
-    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-    let rev = 0;
-    for (let i = 0; i < 9; i++) rev += parseInt(cpf.charAt(i)) * (10 - i);
-    rev = 11 - (rev % 11);
-    if (rev === 10 || rev === 11) rev = 0;
-    if (rev !== parseInt(cpf.charAt(9))) return false;
-    rev = 0;
-    for (let i = 0; i < 10; i++) rev += parseInt(cpf.charAt(i)) * (11 - i);
-    rev = 11 - (rev % 11);
-    if (rev === 10 || rev === 11) rev = 0;
-    return rev === parseInt(cpf.charAt(10));
-  }
-
-  function validateAndStart() {
-    const nome = document.getElementById('input-nome').value.trim();
-    const cpf = document.getElementById('input-cpf').value.trim().replace(/[^\d]/g, '');
-    const email = document.getElementById('input-email').value.trim();
-    const phone = document.getElementById('input-phone').value.trim();
-    const err = document.getElementById('error');
-
-    if (!nome || !cpf || !email || !phone) {
-      err.innerText = 'Por favor, preencha todos os campos.';
-      return;
-    }
-
-    if (!isValidCPF(cpf)) {
-      err.innerText = 'CPF inválido. Verifique os números.';
-      return;
-    }
-
-    const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
-    if (playedCPFs.includes(cpf)) {
-      err.innerText = 'Este CPF já realizou uma tentativa!';
-      return;
-    }
-
-    window.currentUser = { nome, cpf, email, phone };
-    showPage('page-wheel');
-    drawWheel();
-  }
-
-  // Lista expandida para 6 fatias (visualmente mais bonita e simétrica)
-  const items = [
-    { label: "Agenda", color: "#f8d000", textColor: "#0b2265", weight: 5 },   
-    { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 22.5 }, 
-    { label: "Caneta", color: "#0b2265", textColor: "#ffffff", weight: 25 },
-    { label: "Agenda", color: "#f8d000", textColor: "#0b2265", weight: 5 },   
-    { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 22.5 }, 
-    { label: "Caneta", color: "#0b2265", textColor: "#ffffff", weight: 25 }
-  ];
-
-  const canvas = document.getElementById('wheel');
-  const ctx = canvas.getContext('2d');
-
-  function drawWheel() {
-    const numSlices = items.length;
-    const sliceAngle = (2 * Math.PI) / numSlices;
-    ctx.clearRect(0, 0, 360, 360);
-
-    items.forEach((item, i) => {
-      const angle = i * sliceAngle;
-      ctx.beginPath();
-      ctx.fillStyle = item.color;
-      ctx.moveTo(180, 180);
-      ctx.arc(180, 180, 180, angle, angle + sliceAngle);
-      ctx.lineTo(180, 180);
-      ctx.fill();
-
-      // Linhas divisórias entre as fatias
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.save();
-      ctx.translate(180, 180);
-      ctx.rotate(angle + sliceAngle / 2);
-      ctx.fillStyle = item.textColor;
-      ctx.font = "bold 16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(item.label, 100, 5);
-      ctx.restore();
-    });
-  }
-
-  function getWeightedItemIndex() {
-    const rand = Math.random() * 100;
-    let sum = 0;
-    for (let i = 0; i < items.length; i++) {
-      sum += items[i].weight;
-      if (rand <= sum) return i;
-    }
-    return 0;
-  }
-
-  let isSpinning = false;
-  let currentRotation = 0;
-
-  function spinWheel() {
-    if (isSpinning) return;
-    isSpinning = true;
-    document.getElementById('spin-btn').style.display = 'none';
-
-    const chosenIndex = getWeightedItemIndex();
-    const selectedItem = items[chosenIndex];
-    const numSlices = items.length;
-    const sliceAngle = 360 / numSlices;
-
-    // Cálculo exato para o ponteiro no topo (270 graus no Canvas)
-    const sliceMiddle = chosenIndex * sliceAngle + (sliceAngle / 2);
-    const targetRotation = (270 - sliceMiddle + 360) % 360;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roleta ENESC-GO JOVEM</title>
+  <!-- Simple-Keyboard CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     
-    // Adiciona giros completos extras
-    const extraSpins = 360 * 5;
-    const totalRotation = currentRotation + extraSpins + ((targetRotation - (currentRotation % 360) + 360) % 360);
-    currentRotation = totalRotation;
+    body { 
+      background: linear-gradient(135deg, #1b429b 0%, #0b2265 100%); 
+      color: #ffffff; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+      overflow: hidden; 
+    }
+    
+    .page { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: absolute; top: 0; left: 0; }
+    .active { display: flex; }
+    
+    /* Início */
+    .logo { max-width: 320px; width: 80%; height: auto; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+    
+    .btn { 
+      background: linear-gradient(180deg, #f8d000 0%, #e0ab00 100%); 
+      color: #0b2265; 
+      border: 3px solid #ffffff; 
+      padding: 18px 50px; 
+      font-size: 1.8rem; 
+      font-weight: 800; 
+      border-radius: 50px; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .btn:hover { 
+      transform: scale(1.05); 
+      background: linear-gradient(180deg, #ffe033 0%, #f8d000 100%);
+      box-shadow: 0 12px 25px rgba(248, 208, 0, 0.4);
+    }
 
-    let start = null;
-    function animate(timestamp) {
-      if (!start) start = timestamp;
-      const progress = (timestamp - start) / 4000;
+    /* Formulário */
+    .form-container { 
+      background: rgba(11, 34, 101, 0.85); 
+      backdrop-filter: blur(10px);
+      padding: 30px; 
+      border-radius: 20px; 
+      width: 100%; 
+      max-width: 600px; 
+      border: 2px solid rgba(248, 208, 0, 0.4);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+    }
+    
+    .form-container h2 {
+      color: #f8d000;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; margin-bottom: 4px; font-size: 1.05rem; font-weight: 600; color: #e2e8f0; }
+    .form-group input { 
+      width: 100%; 
+      padding: 14px; 
+      border-radius: 10px; 
+      border: 2px solid #1e50bc; 
+      background: #0d1b40; 
+      color: #ffffff; 
+      font-size: 1.2rem; 
+    }
+    
+    .form-group input:focus { 
+      border-color: #f8d000; 
+      outline: none; 
+      box-shadow: 0 0 10px rgba(248, 208, 0, 0.5);
+    }
+    
+    .error-msg { color: #ff4d4d; margin-top: 10px; text-align: center; font-weight: bold; font-size: 1.1rem; }
+
+    /* Teclado Virtual */
+    .simple-keyboard { 
+      color: #000; 
+      margin-top: 15px; 
+      max-width: 600px; 
+      border-radius: 12px; 
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 8px;
+    }
+    .hg-button {
+      height: 45px !important;
+      font-size: 1.2rem !important;
+      font-weight: bold !important;
+    }
+
+    /* Roleta */
+    .wheel-container { position: relative; width: 360px; height: 360px; margin-bottom: 25px; }
+    canvas { border-radius: 50%; border: 6px solid #f8d000; box-shadow: 0 0 30px rgba(0,0,0,0.6); }
+    
+    .arrow { 
+      position: absolute; 
+      top: -18px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 0; 
+      height: 0; 
+      border-left: 18px solid transparent; 
+      border-right: 18px solid transparent; 
+      border-top: 32px solid #009933; 
+      filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5));
+      z-index: 10; 
+    }
+    
+    .result-msg { 
+      font-size: 2.2rem; 
+      font-weight: 800; 
+      text-align: center; 
+      min-height: 60px; 
+      color: #f8d000; 
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TELA 1: INÍCIO -->
+  <div id="page-home" class="page active">
+    <img src="logo-enesc.jpeg" alt="Logo ENESC-GO JOVEM" class="logo" onerror="this.src='https://via.placeholder.com/320x320/0b2265/f8d000?text=ENESC-GO+JOVEM'">
+    <button class="btn" onclick="goToForm()">INICIAR</button>
+  </div>
+
+  <!-- TELA 2: FORMULÁRIO -->
+  <div id="page-form" class="page">
+    <div class="form-container">
+      <h2 style="text-align: center; margin-bottom: 15px;">Informe seus dados</h2>
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="input-nome" class="input" placeholder="Digite seu nome">
+      </div>
+      <div class="form-group">
+        <label>CPF</label>
+        <input type="text" id="input-cpf" class="input" placeholder="000.000.000-00">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="input-email" class="input" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Número de Telefone</label>
+        <input type="tel" id="input-phone" class="input" placeholder="(00) 00000-0000">
+      </div>
+      <div id="error" class="error-msg"></div>
+      <button class="btn" style="width: 100%; margin-top: 15px; font-size: 1.5rem;" onclick="validateAndStart()">GIRAR ROLETA</button>
+    </div>
+    <div class="simple-keyboard"></div>
+  </div>
+
+  <!-- TELA 3: ROLETA -->
+  <div id="page-wheel" class="page">
+    <div class="wheel-container">
+      <div class="arrow"></div>
+      <canvas id="wheel" width="360" height="360"></canvas>
+    </div>
+    <button id="spin-btn" class="btn" onclick="spinWheel()">GIRAR!</button>
+    <div id="result" class="result-msg"></div>
+  </div>
+
+  <!-- Simple-Keyboard JS -->
+  <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
+  <script>
+    // URL Completa do Webhook do Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby20Y0vvxAA_iz5Ddw7vCXea6piV8Pap_YkHUd19pFxiYxrgkDsJMWnJ9oF1RECqhCL1Q/exec";
+
+    let activeInput = null;
+    const Keyboard = window.SimpleKeyboard.default;
+    const keyboard = new Keyboard({
+      onChange: input => onChangeKeyboard(input),
+      onKeyPress: button => onKeyPressKeyboard(button),
+      layout: {
+        default: [
+          "1 2 3 4 5 6 7 8 9 0 {bksp}",
+          "q w e r t y u i o p",
+          "a s d f g h j k l",
+          "z x c v b n m . @",
+          "{space}"
+        ]
+      },
+      display: {
+        "{bksp}": "⌫ Apagar",
+        "{space}": "Espaço"
+      }
+    });
+
+    document.querySelectorAll(".input").forEach(input => {
+      input.addEventListener("focus", onInputFocus);
+      input.addEventListener("keyup", onInputKeyUp);
+    });
+
+    function onInputFocus(event) {
+      activeInput = event.target;
+      keyboard.setOptions({ inputName: event.target.id });
+      keyboard.setInput(event.target.value);
+    }
+
+    function onInputKeyUp(event) {
+      keyboard.setInput(event.target.value);
+    }
+
+    function onChangeKeyboard(input) {
+      if (activeInput) activeInput.value = input;
+    }
+
+    function onKeyPressKeyboard(button) {}
+
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function goToForm() {
+      document.getElementById('error').innerText = '';
+      document.querySelectorAll('.input').forEach(i => i.value = '');
+      keyboard.clearInput();
+      showPage('page-form');
+    }
+
+    function isValidCPF(cpf) {
+      cpf = cpf.replace(/[^\d]+/g, '');
+      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+      let rev = 0;
+      for (let i = 0; i < 9; i++) rev += parseInt(cpf.charAt(i)) * (10 - i);
+      rev = 11 - (rev % 11);
+      if (rev === 10 || rev === 11) rev = 0;
+      if (rev !== parseInt(cpf.charAt(9))) return false;
+      rev = 0;
+      for (let i = 0; i < 10; i++) rev += parseInt(cpf.charAt(i)) * (11 - i);
+      rev = 11 - (rev % 11);
+      if (rev === 10 || rev === 11) rev = 0;
+      return rev === parseInt(cpf.charAt(10));
+    }
+
+    function validateAndStart() {
+      const nome = document.getElementById('input-nome').value.trim();
+      const cpf = document.getElementById('input-cpf').value.trim().replace(/[^\d]/g, '');
+      const email = document.getElementById('input-email').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+      const err = document.getElementById('error');
+
+      if (!nome || !cpf || !email || !phone) {
+        err.innerText = 'Por favor, preencha todos os campos.';
+        return;
+      }
+
+      if (!isValidCPF(cpf)) {
+        err.innerText = 'CPF inválido. Verifique os números.';
+        return;
+      }
+
+      const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
+      if (playedCPFs.includes(cpf)) {
+        err.innerText = 'Este CPF já realizou uma tentativa!';
+        return;
+      }
+
+      window.currentUser = { nome, cpf, email, phone };
+      showPage('page-wheel');
+      drawWheel();
+    }
+
+    // Lista expandida para 6 fatias (visualmente simétrica)
+    const items = [
+      { label: "Agenda", color: "#f8d000", textColor: "#0b2265", weight: 5 },   
+      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 22.5 }, 
+      { label: "Caneta", color: "#0b2265", textColor: "#ffffff", weight: 25 },
+      { label: "Agenda", color: "#f8d000", textColor: "#0b2265", weight: 5 },   
+      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 22.5 }, 
+      { label: "Caneta", color: "#0b2265", textColor: "#ffffff", weight: 25 }
+    ];
+
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+
+    function drawWheel() {
+      const numSlices = items.length;
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      ctx.clearRect(0, 0, 360, 360);
+
+      items.forEach((item, i) => {
+        const angle = i * sliceAngle;
+        ctx.beginPath();
+        ctx.fillStyle = item.color;
+        ctx.moveTo(180, 180);
+        ctx.arc(180, 180, 180, angle, angle + sliceAngle);
+        ctx.lineTo(180, 180);
+        ctx.fill();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(180, 180);
+        ctx.rotate(angle + sliceAngle / 2);
+        ctx.fillStyle = item.textColor;
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(item.label, 100, 5);
+        ctx.restore();
+      });
+    }
+
+    function getWeightedItemIndex() {
+      const rand = Math.random() * 100;
+      let sum = 0;
+      for (let i = 0; i < items.length; i++) {
+        sum += items[i].weight;
+        if (rand <= sum) return i;
+      }
+      return 0;
+    }
+
+    let isSpinning = false;
+    let currentRotation = 0;
+
+    function spinWheel() {
+      if (isSpinning) return;
+      isSpinning = true;
+      document.getElementById('spin-btn').style.display = 'none';
+
+      const chosenIndex = getWeightedItemIndex();
+      const selectedItem = items[chosenIndex];
+      const numSlices = items.length;
+      const sliceAngle = 360 / numSlices;
+
+      const sliceMiddle = chosenIndex * sliceAngle + (sliceAngle / 2);
+      const targetRotation = (270 - sliceMiddle + 360) % 360;
       
-      if (progress < 1) {
-        const easeOut = 1 - Math.pow(1 - progress, 4);
-        canvas.style.transform = `rotate(${easeOut * totalRotation}deg)`;
-        requestAnimationFrame(animate);
-      } else {
-        canvas.style.transform = `rotate(${totalRotation}deg)`;
-        document.getElementById('result').innerText = `Parabéns! Você ganhou: ${selectedItem.label}`;
+      const extraSpins = 360 * 5;
+      const totalRotation = currentRotation + extraSpins + ((targetRotation - (currentRotation % 360) + 360) % 360);
+      currentRotation = totalRotation;
+
+      let start = null;
+      function animate(timestamp) {
+        if (!start) start = timestamp;
+        const progress = (timestamp - start) / 4000;
         
-        // Envio automático para o Google Sheets
-        if (SCRIPT_URL && SCRIPT_URL !== "AKfycby20Y0vvxAA_iz5Ddw7vCXea6piV8Pap_YkHUd19pFxiYxrgkDsJMWnJ9oF1RECqhCL1Q") {
+        if (progress < 1) {
+          const easeOut = 1 - Math.pow(1 - progress, 4);
+          canvas.style.transform = `rotate(${easeOut * totalRotation}deg)`;
+          requestAnimationFrame(animate);
+        } else {
+          canvas.style.transform = `rotate(${totalRotation}deg)`;
+          document.getElementById('result').innerText = `Parabéns! Você ganhou: ${selectedItem.label}`;
+          
+          // Envio dos dados ao Google Sheets
           fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -200,21 +371,22 @@
               item: selectedItem.label
             })
           }).catch(err => console.error("Erro ao enviar dados:", err));
+
+          // Bloqueio do CPF
+          const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
+          playedCPFs.push(window.currentUser.cpf);
+          localStorage.setItem('played_cpfs', JSON.stringify(playedCPFs));
+
+          setTimeout(() => {
+            document.getElementById('spin-btn').style.display = 'inline-block';
+            document.getElementById('result').innerText = '';
+            isSpinning = false;
+            showPage('page-home');
+          }, 10000);
         }
-
-        // Bloqueio do CPF
-        const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
-        playedCPFs.push(window.currentUser.cpf);
-        localStorage.setItem('played_cpfs', JSON.stringify(playedCPFs));
-
-        setTimeout(() => {
-          document.getElementById('spin-btn').style.display = 'inline-block';
-          document.getElementById('result').innerText = '';
-          isSpinning = false;
-          showPage('page-home');
-        }, 10000);
       }
+      requestAnimationFrame(animate);
     }
-    requestAnimationFrame(animate);
-  }
-</script>
+  </script>
+</body>
+</html>
