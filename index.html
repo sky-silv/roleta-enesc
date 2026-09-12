@@ -174,7 +174,6 @@
   <!-- Simple-Keyboard JS -->
   <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
   <script>
-    // URL Completa do Webhook do Google Apps Script
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby20Y0vvxAA_iz5Ddw7vCXea6piV8Pap_YkHUd19pFxiYxrgkDsJMWnJ9oF1RECqhCL1Q/exec";
 
     let activeInput = null;
@@ -273,14 +272,15 @@
       drawWheel();
     }
 
-    // Lista atualizada: 6 prêmios únicos com probabilidades configuradas
+    // Lista de 7 itens dividida entre raros e comuns
     const items = [
-      { label: "Agenda", color: "#f8d000", textColor: "#0b2265", weight: 15 },
-      { label: "Sacolinha", color: "#009933", textColor: "#ffffff", weight: 15 },
-      { label: "Caneta", color: "#0b2265", textColor: "#ffffff", weight: 17.5 },
-      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 17.5 },
-      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 17.5 },
-      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 17.5 }
+      { label: "Camiseta", color: "#f8d000", textColor: "#0b2265", weight: 5 },       // Raro (5%)
+      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 21.25 },   // Comum (21.25%)
+      { label: "Caderneta", color: "#0b2265", textColor: "#ffffff", weight: 5 },      // Raro (5%)
+      { label: "Caneta", color: "#f8d000", textColor: "#0b2265", weight: 21.25 },     // Comum (21.25%)
+      { label: "Sacolinha", color: "#009933", textColor: "#ffffff", weight: 5 },     // Raro (5%)
+      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 21.25 },     // Comum (21.25%)
+      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 21.25 }      // Comum (21.25%)
     ];
 
     const canvas = document.getElementById('wheel');
@@ -308,9 +308,9 @@
         ctx.translate(180, 180);
         ctx.rotate(angle + sliceAngle / 2);
         ctx.fillStyle = item.textColor;
-        ctx.font = "bold 15px Arial";
+        ctx.font = "bold 14px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(item.label, 100, 5);
+        ctx.fillText(item.label, 105, 5);
         ctx.restore();
       });
     }
