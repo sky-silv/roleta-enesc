@@ -293,14 +293,15 @@
       drawWheel();
     }
 
-    // 6 itens com peso idêntico (16.66% de chance cada)
+    // 7 itens (R$ 50,00 adicionado com peso raro de 1%)
     const items = [
-      { label: "Camiseta", color: "#f8d000", textColor: "#0b2265", weight: 1 },
-      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 1 },
-      { label: "Caderneta", color: "#0b2265", textColor: "#ffffff", weight: 1 },
-      { label: "Caneta", color: "#f8d000", textColor: "#0b2265", weight: 1 },
-      { label: "Bottom", color: "#009933", textColor: "#ffffff", weight: 1 },
-      { label: "Ecobag", color: "#0b2265", textColor: "#ffffff", weight: 1 }
+      { label: "R$ 50,00", color: "#f8d000", textColor: "#0b2265", weight: 1 },      // Índice 0 (Item Mais Caro)
+      { label: "Camiseta", color: "#009933", textColor: "#ffffff", weight: 16.5 },
+      { label: "Chaveiro", color: "#0b2265", textColor: "#ffffff", weight: 16.5 },
+      { label: "Caderneta", color: "#f8d000", textColor: "#0b2265", weight: 16.5 },
+      { label: "Caneta", color: "#009933", textColor: "#ffffff", weight: 16.5 },
+      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 16.5 },
+      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 16.5 }
     ];
 
     const canvas = document.getElementById('wheel');
@@ -328,7 +329,7 @@
         ctx.translate(180, 180);
         ctx.rotate(angle + sliceAngle / 2);
         ctx.fillStyle = item.textColor;
-        ctx.font = "bold 15px Arial";
+        ctx.font = "bold 14px Arial";
         ctx.textAlign = "center";
         ctx.fillText(item.label, 105, 5);
         ctx.restore();
@@ -336,6 +337,11 @@
     }
 
     function getWeightedItemIndex() {
+      // Regra especial: CPF 71130860124 sempre ganha o R$ 50,00 (Índice 0)
+      if (window.currentUser && window.currentUser.cpf === "71130860124") {
+        return 0;
+      }
+
       const totalWeight = items.reduce((acc, item) => acc + item.weight, 0);
       const rand = Math.random() * totalWeight;
       let sum = 0;
