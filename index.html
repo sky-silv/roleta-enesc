@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roleta ENESC-GO JOVEM</title>
-  <!-- Simple-Keyboard CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/css/index.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    }
     
     body { 
       background: linear-gradient(135deg, #1b429b 0%, #0b2265 100%); 
@@ -19,101 +22,85 @@
       overflow: hidden; 
     }
     
-    .page { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: absolute; top: 0; left: 0; }
-    .active { display: flex; }
+    .page { 
+      display: none; 
+      width: 100vw; 
+      height: 100vh; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px; 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+    }
     
-    /* Início */
-    .logo { max-width: 320px; width: 80%; height: auto; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+    .active { 
+      display: flex; 
+    }
+    
+    /* Tela Inicial */
+    .logo { 
+      max-width: 320px; 
+      width: 80%; 
+      height: auto; 
+      margin-bottom: 35px; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+    }
     
     .btn { 
       background: linear-gradient(180deg, #f8d000 0%, #e0ab00 100%); 
       color: #0b2265; 
       border: 3px solid #ffffff; 
-      padding: 18px 50px; 
+      padding: 18px 55px; 
       font-size: 1.8rem; 
       font-weight: 800; 
       border-radius: 50px; 
       cursor: pointer; 
-      transition: all 0.3s ease; 
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3); 
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3); 
       text-transform: uppercase;
       letter-spacing: 1px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     
-    .btn:hover { 
-      transform: scale(1.05); 
+    .btn:hover, .btn:active { 
+      transform: scale(1.06); 
       background: linear-gradient(180deg, #ffe033 0%, #f8d000 100%);
-      box-shadow: 0 12px 25px rgba(248, 208, 0, 0.4);
+      box-shadow: 0 12px 30px rgba(248, 208, 0, 0.5);
     }
 
-    /* Formulário */
-    .form-container { 
-      background: rgba(11, 34, 101, 0.85); 
-      backdrop-filter: blur(10px);
-      padding: 30px; 
-      border-radius: 20px; 
-      width: 100%; 
-      max-width: 600px; 
-      border: 2px solid rgba(248, 208, 0, 0.4);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+    /* Tela da Roleta */
+    .wheel-container { 
+      position: relative; 
+      width: 360px; 
+      height: 360px; 
+      max-width: 90vw;
+      max-height: 90vw;
+      margin-bottom: 30px; 
     }
     
-    .form-container h2 {
-      color: #f8d000;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    canvas { 
+      width: 100%;
+      height: 100%;
+      border-radius: 50%; 
+      border: 8px solid #f8d000; 
+      box-shadow: 0 0 35px rgba(0,0,0,0.6); 
     }
-
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; margin-bottom: 4px; font-size: 1.05rem; font-weight: 600; color: #e2e8f0; }
-    .form-group input { 
-      width: 100%; 
-      padding: 14px; 
-      border-radius: 10px; 
-      border: 2px solid #1e50bc; 
-      background: #0d1b40; 
-      color: #ffffff; 
-      font-size: 1.2rem; 
-    }
-    
-    .form-group input:focus { 
-      border-color: #f8d000; 
-      outline: none; 
-      box-shadow: 0 0 10px rgba(248, 208, 0, 0.5);
-    }
-    
-    .error-msg { color: #ff4d4d; margin-top: 10px; text-align: center; font-weight: bold; font-size: 1.1rem; }
-
-    /* Teclado Virtual */
-    .simple-keyboard { 
-      color: #000; 
-      margin-top: 15px; 
-      max-width: 600px; 
-      border-radius: 12px; 
-      background-color: rgba(255, 255, 255, 0.95);
-      padding: 8px;
-    }
-    .hg-button {
-      height: 45px !important;
-      font-size: 1.2rem !important;
-      font-weight: bold !important;
-    }
-
-    /* Roleta */
-    .wheel-container { position: relative; width: 360px; height: 360px; margin-bottom: 25px; }
-    canvas { border-radius: 50%; border: 6px solid #f8d000; box-shadow: 0 0 30px rgba(0,0,0,0.6); }
     
     .arrow { 
       position: absolute; 
-      top: -18px; 
+      top: -22px; 
       left: 50%; 
       transform: translateX(-50%); 
       width: 0; 
       height: 0; 
-      border-left: 18px solid transparent; 
-      border-right: 18px solid transparent; 
-      border-top: 32px solid #009933; 
-      filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.5));
+      border-left: 20px solid transparent; 
+      border-right: 20px solid transparent; 
+      border-top: 36px solid #009933; 
+      filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.6));
       z-index: 10; 
     }
     
@@ -121,9 +108,28 @@
       font-size: 2.2rem; 
       font-weight: 800; 
       text-align: center; 
-      min-height: 60px; 
+      min-height: 70px; 
       color: #f8d000; 
-      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      text-shadow: 0 3px 12px rgba(0,0,0,0.6);
+      padding: 0 15px;
+      margin-top: 10px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
   </style>
 </head>
@@ -132,28 +138,10 @@
   <!-- TELA 1: INÍCIO -->
   <div id="page-home" class="page active">
     <img src="logo-enesc.jpeg" alt="Logo ENESC-GO JOVEM" class="logo" onerror="this.src='https://via.placeholder.com/320x320/0b2265/f8d000?text=ENESC-GO+JOVEM'">
-    <button class="btn" onclick="goToForm()">INICIAR</button>
+    <button class="btn" onclick="goToWheel()">INICIAR</button>
   </div>
 
-  <!-- TELA 2: FORMULÁRIO -->
-  <div id="page-form" class="page">
-    <div class="form-container">
-      <h2 style="text-align: center; margin-bottom: 15px;">Informe seus dados</h2>
-      <div class="form-group">
-        <label>Primeiro Nome</label>
-        <input type="text" id="input-nome" class="input" placeholder="Digite seu primeiro nome">
-      </div>
-      <div class="form-group">
-        <label>Sobrenome</label>
-        <input type="text" id="input-sobrenome" class="input" placeholder="Digite seu sobrenome">
-      </div>
-      <div id="error" class="error-msg"></div>
-      <button class="btn" style="width: 100%; margin-top: 15px; font-size: 1.5rem;" onclick="validateAndStart()">GIRAR ROLETA</button>
-    </div>
-    <div class="simple-keyboard"></div>
-  </div>
-
-  <!-- TELA 3: ROLETA -->
+  <!-- TELA 2: ROLETA -->
   <div id="page-wheel" class="page">
     <div class="wheel-container">
       <div class="arrow"></div>
@@ -161,89 +149,37 @@
     </div>
     <button id="spin-btn" class="btn" onclick="spinWheel()">GIRAR!</button>
     <div id="result" class="result-msg"></div>
+    <button id="back-btn" class="btn-secondary" style="display: none;" onclick="goToHome()">INÍCIO</button>
   </div>
 
-  <!-- Simple-Keyboard JS -->
-  <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
   <script>
-    let activeInput = null;
-    const Keyboard = window.SimpleKeyboard.default;
-    const keyboard = new Keyboard({
-      onChange: input => onChangeKeyboard(input),
-      onKeyPress: button => onKeyPressKeyboard(button),
-      layout: {
-        default: [
-          "q w e r t y u i o p",
-          "a s d f g h j k l",
-          "z x c v b n m {bksp}",
-          "{space}"
-        ]
-      },
-      display: {
-        "{bksp}": "⌫ Apagar",
-        "{space}": "Espaço"
-      }
-    });
-
-    document.querySelectorAll(".input").forEach(input => {
-      input.addEventListener("focus", onInputFocus);
-      input.addEventListener("keyup", onInputKeyUp);
-    });
-
-    function onInputFocus(event) {
-      activeInput = event.target;
-      keyboard.setOptions({ inputName: event.target.id });
-      keyboard.setInput(event.target.value);
-    }
-
-    function onInputKeyUp(event) {
-      keyboard.setInput(event.target.value);
-    }
-
-    function onChangeKeyboard(input) {
-      if (activeInput) activeInput.value = input;
-    }
-
-    function onKeyPressKeyboard(button) {}
-
+    // Navegação de páginas
     function showPage(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(id).classList.add('active');
     }
 
-    function goToForm() {
-      document.getElementById('error').innerText = '';
-      document.querySelectorAll('.input').forEach(i => i.value = '');
-      keyboard.clearInput();
-      showPage('page-form');
-    }
-
-    function validateAndStart() {
-      const nome = document.getElementById('input-nome').value.trim();
-      const sobrenome = document.getElementById('input-sobrenome').value.trim();
-      const err = document.getElementById('error');
-
-      if (!nome || !sobrenome) {
-        err.innerText = 'Por favor, preencha o nome e o sobrenome.';
-        return;
-      }
-
-      window.currentUser = { nome, sobrenome };
+    function goToWheel() {
+      document.getElementById('result').innerText = '';
+      document.getElementById('spin-btn').style.display = 'inline-block';
+      document.getElementById('back-btn').style.display = 'none';
       showPage('page-wheel');
       drawWheel();
     }
 
-    // 8 Itens na roleta
-    // R$ 100,00 tem peso 3.5 (3.5%), os demais dividem 96.5% (~13.78% cada)
+    function goToHome() {
+      showPage('page-home');
+    }
+
+    // 7 Itens na roleta com probabilidades exatamente iguais (1/7)
     const items = [
-      { label: "R$ 100,00", color: "#e63946", textColor: "#ffffff", weight: 3.5 }, // Índice 0
-      { label: "R$ 50,00", color: "#f8d000", textColor: "#0b2265", weight: 13.78 },
-      { label: "Camiseta", color: "#009933", textColor: "#ffffff", weight: 13.78 },
-      { label: "Chaveiro", color: "#0b2265", textColor: "#ffffff", weight: 13.78 },
-      { label: "Caderneta", color: "#f8d000", textColor: "#0b2265", weight: 13.78 },
-      { label: "Caneta", color: "#009933", textColor: "#ffffff", weight: 13.78 },
-      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 13.78 },
-      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 13.78 }
+      { label: "R$ 100,00", color: "#e63946", textColor: "#ffffff" },
+      { label: "Camiseta", color: "#009933", textColor: "#ffffff" },
+      { label: "Chaveiro", color: "#0b2265", textColor: "#ffffff" },
+      { label: "Caderneta", color: "#f8d000", textColor: "#0b2265" },
+      { label: "Caneta", color: "#009933", textColor: "#ffffff" },
+      { label: "Bottom", color: "#0b2265", textColor: "#ffffff" },
+      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265" }
     ];
 
     const canvas = document.getElementById('wheel');
@@ -264,35 +200,23 @@
         ctx.fill();
 
         ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.stroke();
 
         ctx.save();
         ctx.translate(180, 180);
         ctx.rotate(angle + sliceAngle / 2);
         ctx.fillStyle = item.textColor;
-        ctx.font = "bold 13px Arial";
+        ctx.font = "bold 14px Arial";
         ctx.textAlign = "center";
         ctx.fillText(item.label, 105, 5);
         ctx.restore();
       });
     }
 
-    function getWeightedItemIndex() {
-      // Regra especial: Sobrenome "Eduardo" ganha obrigatoriamente os R$ 100,00 (Índice 0)
-      if (window.currentUser && window.currentUser.sobrenome.toLowerCase().includes("eduardo")) {
-        return 0;
-      }
-
-      // Sorteio normal com 3.5% de chance para R$ 100,00
-      const totalWeight = items.reduce((acc, item) => acc + item.weight, 0);
-      const rand = Math.random() * totalWeight;
-      let sum = 0;
-      for (let i = 0; i < items.length; i++) {
-        sum += items[i].weight;
-        if (rand <= sum) return i;
-      }
-      return 0;
+    function getRandomItemIndex() {
+      // Sorteio 100% igual e aleatório entre os 7 itens
+      return Math.floor(Math.random() * items.length);
     }
 
     let isSpinning = false;
@@ -302,8 +226,10 @@
       if (isSpinning) return;
       isSpinning = true;
       document.getElementById('spin-btn').style.display = 'none';
+      document.getElementById('back-btn').style.display = 'none';
+      document.getElementById('result').innerText = '';
 
-      const chosenIndex = getWeightedItemIndex();
+      const chosenIndex = getRandomItemIndex();
       const selectedItem = items[chosenIndex];
       const numSlices = items.length;
       const sliceAngle = 360 / numSlices;
@@ -311,14 +237,14 @@
       const sliceMiddle = chosenIndex * sliceAngle + (sliceAngle / 2);
       const targetRotation = (270 - sliceMiddle + 360) % 360;
       
-      const extraSpins = 360 * 5;
+      const extraSpins = 360 * 5; // 5 voltas completas
       const totalRotation = currentRotation + extraSpins + ((targetRotation - (currentRotation % 360) + 360) % 360);
       currentRotation = totalRotation;
 
       let start = null;
       function animate(timestamp) {
         if (!start) start = timestamp;
-        const progress = (timestamp - start) / 4000;
+        const progress = (timestamp - start) / 4000; // 4 segundos de rotação
         
         if (progress < 1) {
           const easeOut = 1 - Math.pow(1 - progress, 4);
@@ -327,13 +253,15 @@
         } else {
           canvas.style.transform = `rotate(${totalRotation}deg)`;
           document.getElementById('result').innerText = `Parabéns! Você ganhou: ${selectedItem.label}`;
-
+          
+          isSpinning = false;
+          
+          // Exibir botões para jogar novamente ou voltar ao início
           setTimeout(() => {
+            document.getElementById('spin-btn').innerText = 'GIRAR NOVAMENTE';
             document.getElementById('spin-btn').style.display = 'inline-block';
-            document.getElementById('result').innerText = '';
-            isSpinning = false;
-            showPage('page-home');
-          }, 8000);
+            document.getElementById('back-btn').style.display = 'inline-block';
+          }, 500);
         }
       }
       requestAnimationFrame(animate);
