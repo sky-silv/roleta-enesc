@@ -272,15 +272,14 @@
       drawWheel();
     }
 
-    // Lista de 7 itens dividida entre raros e comuns
+    // 6 itens com peso idêntico (16.66% de chance cada)
     const items = [
-      { label: "Camiseta", color: "#f8d000", textColor: "#0b2265", weight: 5 },       // Raro (5%)
-      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 21.25 },   // Comum (21.25%)
-      { label: "Caderneta", color: "#0b2265", textColor: "#ffffff", weight: 5 },      // Raro (5%)
-      { label: "Caneta", color: "#f8d000", textColor: "#0b2265", weight: 21.25 },     // Comum (21.25%)
-      { label: "Sacolinha", color: "#009933", textColor: "#ffffff", weight: 5 },     // Raro (5%)
-      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 21.25 },     // Comum (21.25%)
-      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 21.25 }      // Comum (21.25%)
+      { label: "Camiseta", color: "#f8d000", textColor: "#0b2265", weight: 1 },
+      { label: "Chaveiro", color: "#009933", textColor: "#ffffff", weight: 1 },
+      { label: "Caderneta", color: "#0b2265", textColor: "#ffffff", weight: 1 },
+      { label: "Caneta", color: "#f8d000", textColor: "#0b2265", weight: 1 },
+      { label: "Bottom", color: "#009933", textColor: "#ffffff", weight: 1 },
+      { label: "Ecobag", color: "#0b2265", textColor: "#ffffff", weight: 1 }
     ];
 
     const canvas = document.getElementById('wheel');
@@ -308,7 +307,7 @@
         ctx.translate(180, 180);
         ctx.rotate(angle + sliceAngle / 2);
         ctx.fillStyle = item.textColor;
-        ctx.font = "bold 14px Arial";
+        ctx.font = "bold 15px Arial";
         ctx.textAlign = "center";
         ctx.fillText(item.label, 105, 5);
         ctx.restore();
@@ -316,7 +315,8 @@
     }
 
     function getWeightedItemIndex() {
-      const rand = Math.random() * 100;
+      const totalWeight = items.reduce((acc, item) => acc + item.weight, 0);
+      const rand = Math.random() * totalWeight;
       let sum = 0;
       for (let i = 0; i < items.length; i++) {
         sum += items[i].weight;
