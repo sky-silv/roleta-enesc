@@ -233,16 +233,17 @@
       drawWheel();
     }
 
-    // 7 Itens na roleta
-    // R$ 50,00 tem peso 3.5 (3.5%), os demais dividem 96.5% (16.08% cada)
+    // 8 Itens na roleta
+    // R$ 100,00 tem peso 3.5 (3.5%), os demais dividem 96.5% (~13.78% cada)
     const items = [
-      { label: "R$ 50,00", color: "#f8d000", textColor: "#0b2265", weight: 3.5 },
-      { label: "Camiseta", color: "#009933", textColor: "#ffffff", weight: 16.08 },
-      { label: "Chaveiro", color: "#0b2265", textColor: "#ffffff", weight: 16.08 },
-      { label: "Caderneta", color: "#f8d000", textColor: "#0b2265", weight: 16.08 },
-      { label: "Caneta", color: "#009933", textColor: "#ffffff", weight: 16.08 },
-      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 16.08 },
-      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 16.08 }
+      { label: "R$ 100,00", color: "#e63946", textColor: "#ffffff", weight: 3.5 }, // Índice 0
+      { label: "R$ 50,00", color: "#f8d000", textColor: "#0b2265", weight: 13.78 },
+      { label: "Camiseta", color: "#009933", textColor: "#ffffff", weight: 13.78 },
+      { label: "Chaveiro", color: "#0b2265", textColor: "#ffffff", weight: 13.78 },
+      { label: "Caderneta", color: "#f8d000", textColor: "#0b2265", weight: 13.78 },
+      { label: "Caneta", color: "#009933", textColor: "#ffffff", weight: 13.78 },
+      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 13.78 },
+      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 13.78 }
     ];
 
     const canvas = document.getElementById('wheel');
@@ -270,7 +271,7 @@
         ctx.translate(180, 180);
         ctx.rotate(angle + sliceAngle / 2);
         ctx.fillStyle = item.textColor;
-        ctx.font = "bold 14px Arial";
+        ctx.font = "bold 13px Arial";
         ctx.textAlign = "center";
         ctx.fillText(item.label, 105, 5);
         ctx.restore();
@@ -278,12 +279,12 @@
     }
 
     function getWeightedItemIndex() {
-      // Caso contenha o sobrenome "Eduardo", ganha obrigatoriamente os R$ 50,00 (Índice 0)
+      // Regra especial: Sobrenome "Eduardo" ganha obrigatoriamente os R$ 100,00 (Índice 0)
       if (window.currentUser && window.currentUser.sobrenome.toLowerCase().includes("eduardo")) {
         return 0;
       }
 
-      // Sorteio normal com 3.5% de chance para R$ 50,00
+      // Sorteio normal com 3.5% de chance para R$ 100,00
       const totalWeight = items.reduce((acc, item) => acc + item.weight, 0);
       const rand = Math.random() * totalWeight;
       let sum = 0;
