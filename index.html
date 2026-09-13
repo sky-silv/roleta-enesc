@@ -46,6 +46,18 @@
       box-shadow: 0 12px 25px rgba(248, 208, 0, 0.4);
     }
 
+    .btn-reset {
+      background: #1e50bc;
+      color: #fff;
+      border: 1px solid #ffffff55;
+      padding: 8px 15px;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      width: 100%;
+    }
+
     /* Formulário */
     .form-container { 
       background: rgba(11, 34, 101, 0.85); 
@@ -157,6 +169,9 @@
       </div>
       <div id="error" class="error-msg"></div>
       <button class="btn" style="width: 100%; margin-top: 15px; font-size: 1.5rem;" onclick="validateAndStart()">GIRAR ROLETA</button>
+      
+      <!-- BOTÃO PARA RESETAR BLOQUEIO DE CPFs -->
+      <button class="btn-reset" onclick="resetCPFs()">🔄 Limpar Histórico de CPFs</button>
     </div>
     <div class="simple-keyboard"></div>
   </div>
@@ -227,6 +242,12 @@
       document.querySelectorAll('.input').forEach(i => i.value = '');
       keyboard.clearInput();
       showPage('page-form');
+    }
+
+    function resetCPFs() {
+      localStorage.removeItem('played_cpfs');
+      alert('Histórico de jogadas limpo com sucesso! Agora é possível jogar novamente.');
+      document.getElementById('error').innerText = '';
     }
 
     function isValidCPF(cpf) {
