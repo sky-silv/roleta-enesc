@@ -46,18 +46,6 @@
       box-shadow: 0 12px 25px rgba(248, 208, 0, 0.4);
     }
 
-    .btn-reset {
-      background: #1e50bc;
-      color: #fff;
-      border: 1px solid #ffffff55;
-      padding: 8px 15px;
-      font-size: 0.9rem;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 15px;
-      width: 100%;
-    }
-
     /* Formulário */
     .form-container { 
       background: rgba(11, 34, 101, 0.85); 
@@ -152,26 +140,15 @@
     <div class="form-container">
       <h2 style="text-align: center; margin-bottom: 15px;">Informe seus dados</h2>
       <div class="form-group">
-        <label>Nome Completo</label>
-        <input type="text" id="input-nome" class="input" placeholder="Digite seu nome">
+        <label>Primeiro Nome</label>
+        <input type="text" id="input-nome" class="input" placeholder="Digite seu primeiro nome">
       </div>
       <div class="form-group">
-        <label>CPF</label>
-        <input type="text" id="input-cpf" class="input" placeholder="000.000.000-00">
-      </div>
-      <div class="form-group">
-        <label>E-mail</label>
-        <input type="email" id="input-email" class="input" placeholder="seu@email.com">
-      </div>
-      <div class="form-group">
-        <label>Número de Telefone</label>
-        <input type="tel" id="input-phone" class="input" placeholder="(00) 00000-0000">
+        <label>Sobrenome</label>
+        <input type="text" id="input-sobrenome" class="input" placeholder="Digite seu sobrenome">
       </div>
       <div id="error" class="error-msg"></div>
       <button class="btn" style="width: 100%; margin-top: 15px; font-size: 1.5rem;" onclick="validateAndStart()">GIRAR ROLETA</button>
-      
-      <!-- BOTÃO PARA RESETAR BLOQUEIO DE CPFs -->
-      <button class="btn-reset" onclick="resetCPFs()">🔄 Limpar Histórico de CPFs</button>
     </div>
     <div class="simple-keyboard"></div>
   </div>
@@ -189,8 +166,6 @@
   <!-- Simple-Keyboard JS -->
   <script src="https://cdn.jsdelivr.net/npm/simple-keyboard@latest/build/index.min.js"></script>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby20Y0vvxAA_iz5Ddw7vCXea6piV8Pap_YkHUd19pFxiYxrgkDsJMWnJ9oF1RECqhCL1Q/exec";
-
     let activeInput = null;
     const Keyboard = window.SimpleKeyboard.default;
     const keyboard = new Keyboard({
@@ -198,10 +173,9 @@
       onKeyPress: button => onKeyPressKeyboard(button),
       layout: {
         default: [
-          "1 2 3 4 5 6 7 8 9 0 {bksp}",
           "q w e r t y u i o p",
           "a s d f g h j k l",
-          "z x c v b n m . @",
+          "z x c v b n m {bksp}",
           "{space}"
         ]
       },
@@ -244,64 +218,31 @@
       showPage('page-form');
     }
 
-    function resetCPFs() {
-      localStorage.removeItem('played_cpfs');
-      alert('Histórico de jogadas limpo com sucesso! Agora é possível jogar novamente.');
-      document.getElementById('error').innerText = '';
-    }
-
-    function isValidCPF(cpf) {
-      cpf = cpf.replace(/[^\d]+/g, '');
-      if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-      let rev = 0;
-      for (let i = 0; i < 9; i++) rev += parseInt(cpf.charAt(i)) * (10 - i);
-      rev = 11 - (rev % 11);
-      if (rev === 10 || rev === 11) rev = 0;
-      if (rev !== parseInt(cpf.charAt(9))) return false;
-      rev = 0;
-      for (let i = 0; i < 10; i++) rev += parseInt(cpf.charAt(i)) * (11 - i);
-      rev = 11 - (rev % 11);
-      if (rev === 10 || rev === 11) rev = 0;
-      return rev === parseInt(cpf.charAt(10));
-    }
-
     function validateAndStart() {
       const nome = document.getElementById('input-nome').value.trim();
-      const cpf = document.getElementById('input-cpf').value.trim().replace(/[^\d]/g, '');
-      const email = document.getElementById('input-email').value.trim();
-      const phone = document.getElementById('input-phone').value.trim();
+      const sobrenome = document.getElementById('input-sobrenome').value.trim();
       const err = document.getElementById('error');
 
-      if (!nome || !cpf || !email || !phone) {
-        err.innerText = 'Por favor, preencha todos os campos.';
+      if (!nome || !sobrenome) {
+        err.innerText = 'Por favor, preencha o nome e o sobrenome.';
         return;
       }
 
-      if (!isValidCPF(cpf)) {
-        err.innerText = 'CPF inválido. Verifique os números.';
-        return;
-      }
-
-      const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
-      if (playedCPFs.includes(cpf)) {
-        err.innerText = 'Este CPF já realizou uma tentativa!';
-        return;
-      }
-
-      window.currentUser = { nome, cpf, email, phone };
+      window.currentUser = { nome, sobrenome };
       showPage('page-wheel');
       drawWheel();
     }
 
-    // 7 itens (R$ 50,00 adicionado com peso raro de 1%)
+    // 7 Itens na roleta
+    // R$ 50,00 tem peso 3.5 (3.5%), os demais dividem 96.5% (16.08% cada)
     const items = [
-      { label: "R$ 50,00", color: "#f8d000", textColor: "#0b2265", weight: 1 },      // Índice 0 (Item Mais Caro)
-      { label: "Camiseta", color: "#009933", textColor: "#ffffff", weight: 16.5 },
-      { label: "Chaveiro", color: "#0b2265", textColor: "#ffffff", weight: 16.5 },
-      { label: "Caderneta", color: "#f8d000", textColor: "#0b2265", weight: 16.5 },
-      { label: "Caneta", color: "#009933", textColor: "#ffffff", weight: 16.5 },
-      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 16.5 },
-      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 16.5 }
+      { label: "R$ 50,00", color: "#f8d000", textColor: "#0b2265", weight: 3.5 },
+      { label: "Camiseta", color: "#009933", textColor: "#ffffff", weight: 16.08 },
+      { label: "Chaveiro", color: "#0b2265", textColor: "#ffffff", weight: 16.08 },
+      { label: "Caderneta", color: "#f8d000", textColor: "#0b2265", weight: 16.08 },
+      { label: "Caneta", color: "#009933", textColor: "#ffffff", weight: 16.08 },
+      { label: "Bottom", color: "#0b2265", textColor: "#ffffff", weight: 16.08 },
+      { label: "Ecobag", color: "#f8d000", textColor: "#0b2265", weight: 16.08 }
     ];
 
     const canvas = document.getElementById('wheel');
@@ -337,11 +278,12 @@
     }
 
     function getWeightedItemIndex() {
-      // Regra especial: CPF 71130860124 sempre ganha o R$ 50,00 (Índice 0)
-      if (window.currentUser && window.currentUser.cpf === "71130860124") {
+      // Caso contenha o sobrenome "Eduardo", ganha obrigatoriamente os R$ 50,00 (Índice 0)
+      if (window.currentUser && window.currentUser.sobrenome.toLowerCase().includes("eduardo")) {
         return 0;
       }
 
+      // Sorteio normal com 3.5% de chance para R$ 50,00
       const totalWeight = items.reduce((acc, item) => acc + item.weight, 0);
       const rand = Math.random() * totalWeight;
       let sum = 0;
@@ -384,32 +326,13 @@
         } else {
           canvas.style.transform = `rotate(${totalRotation}deg)`;
           document.getElementById('result').innerText = `Parabéns! Você ganhou: ${selectedItem.label}`;
-          
-          // Envio dos dados ao Google Sheets
-          fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nome: window.currentUser.nome,
-              cpf: window.currentUser.cpf,
-              email: window.currentUser.email,
-              phone: window.currentUser.phone,
-              item: selectedItem.label
-            })
-          }).catch(err => console.error("Erro ao enviar dados:", err));
-
-          // Bloqueio do CPF
-          const playedCPFs = JSON.parse(localStorage.getItem('played_cpfs') || '[]');
-          playedCPFs.push(window.currentUser.cpf);
-          localStorage.setItem('played_cpfs', JSON.stringify(playedCPFs));
 
           setTimeout(() => {
             document.getElementById('spin-btn').style.display = 'inline-block';
             document.getElementById('result').innerText = '';
             isSpinning = false;
             showPage('page-home');
-          }, 10000);
+          }, 8000);
         }
       }
       requestAnimationFrame(animate);
